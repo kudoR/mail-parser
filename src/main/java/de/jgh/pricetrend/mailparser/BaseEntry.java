@@ -1,23 +1,42 @@
 package de.jgh.pricetrend.mailparser;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.beans.BeanUtils;
 
-public class AutoScoutEntryDTO {
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.io.Serializable;
+
+@Entity
+public class BaseEntry implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String title;
-    @JsonIgnore
-    private String link;
     private String preis;
     private String laufleistung;
     private String erstzulassung;
     private String motorleistung;
 
-    public AutoScoutEntryDTO(String title, String link, String preis, String laufleistung, String erstzulassung, String motorleistung) {
+    public BaseEntry() {
+    }
+
+    public BaseEntry(String title, String preis, String laufleistung, String erstzulassung, String motorleistung) {
         this.title = title;
-        this.link = link;
         this.preis = preis;
         this.laufleistung = laufleistung;
         this.erstzulassung = erstzulassung;
         this.motorleistung = motorleistung;
+    }
+
+    public BaseEntry(AutoScoutEntryDTO dto) {
+        BeanUtils.copyProperties(dto, this);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -26,14 +45,6 @@ public class AutoScoutEntryDTO {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
     }
 
     public String getPreis() {

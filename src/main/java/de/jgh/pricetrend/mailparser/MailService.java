@@ -17,31 +17,30 @@ import java.util.Properties;
 @Service
 public class MailService {
 
-    public ArrayList<String> getMails(String user, String pw) throws Exception {
+    public ArrayList<String> getMails(String host, String port, String user, String pw) throws Exception {
 
         ArrayList<String> htmlMails = new ArrayList<>();
 
         Properties props = new Properties();
         MailSSLSocketFactory sf = new MailSSLSocketFactory();
         sf.setTrustAllHosts(true);
-        props.setProperty("mail.imaps.host", "imap.gmx.net");
+        props.setProperty("mail.imaps.host", host);
         props.setProperty("mail.imaps.user", user);
         props.setProperty("mail.imaps.password", pw);
-        props.setProperty("mail.imaps.port", "993");
+        props.setProperty("mail.imaps.port", port);
         props.setProperty("mail.imaps.auth", "true");
-        props.setProperty("mail.debug", "true");
+//        props.setProperty("mail.debug", "true");
         props.setProperty("mail.imap.starttls.enable", "true");
         props.put("mail.imap.ssl.socketFactory", sf);
 
         props.setProperty("mail.store.protocol", "imaps");
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
-        store.connect("imap.gmx.net", 993, user, pw);
+        store.connect(host, Integer.valueOf(port), user, pw);
         Folder inbox = store.getFolder("INBOX");
         inbox.open(Folder.READ_ONLY);
 
         Message[] messages = inbox.getMessages();
-
 
         Arrays.stream(messages).forEach(message -> {
             try {
