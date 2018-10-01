@@ -2,6 +2,8 @@ package de.jgh.pricetrend.mailparser;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.time.LocalDate;
+
 public class AutoScoutEntryDTO {
     private String title;
     @JsonIgnore
@@ -10,14 +12,33 @@ public class AutoScoutEntryDTO {
     private String laufleistung;
     private String erstzulassung;
     private String motorleistung;
+    private LocalDate insertDate;
+    private LocalDate receivedDate;
 
-    public AutoScoutEntryDTO(String title, String link, String preis, String laufleistung, String erstzulassung, String motorleistung) {
+    public AutoScoutEntryDTO(String title, String link, String preis, String laufleistung, String erstzulassung, String motorleistung, LocalDate receivedDate) {
         this.title = title;
         this.link = link;
         this.preis = preis;
         this.laufleistung = laufleistung;
         this.erstzulassung = erstzulassung;
         this.motorleistung = motorleistung;
+        this.receivedDate = receivedDate;
+    }
+
+    public LocalDate getReceivedDate() {
+        return receivedDate;
+    }
+
+    public void setReceivedDate(LocalDate receivedDate) {
+        this.receivedDate = receivedDate;
+    }
+
+    public LocalDate getInsertDate() {
+        return insertDate;
+    }
+
+    public void setInsertDate(LocalDate insertDate) {
+        this.insertDate = insertDate;
     }
 
     public String getTitle() {

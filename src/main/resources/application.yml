@@ -8,3 +8,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+server:
+  port: 8081
+
+---
+spring:
+  profiles: production
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+

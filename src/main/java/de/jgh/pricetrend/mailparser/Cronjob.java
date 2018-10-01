@@ -37,13 +37,13 @@ public class Cronjob {
     @Value("${pw}")
     private String pw;
 
-    @Scheduled(fixedRateString = "10000")
+    @Scheduled(fixedRateString = "100000")
     public void refreshData() throws Exception {
         System.out.println("Running refreshData");
 
         parseMailsAndSaveData();
 
-
+        processBaseEntries();
     }
 
     private void parseMailsAndSaveData() throws Exception {
@@ -52,14 +52,20 @@ public class Cronjob {
                 .stream()
                 .map(parserService::parseMail);
 
-        listStream.forEach(list -> {
-            baseEntryRepository.saveAll(
-                    list
-                            .stream()
-                            .map(dto -> new BaseEntry(dto))
-                            .collect(Collectors.toList())
-            );
-        });
+        listStream.forEach(list -> baseEntryRepository.saveAll(
+                list
+                        .stream()
+                        .map(dto -> new BaseEntry(dto))
+                        .collect(Collectors.toList())
+        ));
+    }
+
+    private void processBaseEntries() {
+        baseEntryRepository.findAll()
+                .stream()
+                .forEach(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
+              //  .map(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
+
     }
 
 

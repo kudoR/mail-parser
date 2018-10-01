@@ -10,16 +10,14 @@ import javax.mail.Message;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
 
 @Service
 public class MailService {
 
-    public ArrayList<String> getMails(String host, String port, String user, String pw) throws Exception {
+    public List<MailEntry> getMails(String host, String port, String user, String pw) throws Exception {
 
-        ArrayList<String> htmlMails = new ArrayList<>();
+        List<MailEntry> htmlMails = new ArrayList<>();
 
         Properties props = new Properties();
         MailSSLSocketFactory sf = new MailSSLSocketFactory();
@@ -45,8 +43,9 @@ public class MailService {
         Arrays.stream(messages).forEach(message -> {
             try {
                 MimeMessage mimeMessage = new MimeMessageHelper((MimeMessage) message).getMimeMessage();
+                Date receivedDate = mimeMessage.getReceivedDate();
                 MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage).parse();
-                htmlMails.add(mimeMessageParser.getHtmlContent());
+                htmlMails.add(new MailEntry(receivedDate,mimeMessageParser.getHtmlContent()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

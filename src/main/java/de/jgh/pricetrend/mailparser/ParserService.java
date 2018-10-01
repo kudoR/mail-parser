@@ -1,21 +1,23 @@
 package de.jgh.pricetrend.mailparser;
 
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class ParserService {
 
-    public List<AutoScoutEntryDTO> parseMail(String htmlInput) {
+    public List<AutoScoutEntryDTO> parseMail(MailEntry mailEntry) {
         ArrayList<AutoScoutEntryDTO> autoScoutEntryDTOS = new ArrayList<>();
+
+        String htmlInput = mailEntry.getContent();
+        Date receivedDate = mailEntry.getReceivedDate();
 
         Elements elements = Jsoup
                 .parse(htmlInput)
@@ -23,7 +25,7 @@ public class ParserService {
 
         elements.forEach(element -> {
             String title = element.parent().select("table.drop td").text();
-            String link = element.parent().select("table.drop a").attr("onclick");
+            String link = element.parent().select("table.drop a").attr("href");
             Elements base = element.parent().select("table.mobile-hidden td");
             String preis = base.get(0).text();
             String laufleistung = base.get(2).text();
@@ -31,6 +33,7 @@ public class ParserService {
             String motorleistungInKw = base.get(6).text();
             link = link.replace("parent.phx.event.mailUrlClicked('", "");
             link = link.replace("'); return true;", "");
+            link = link.replace("http://click.rtm.autoscout24.com/?qs=", "");
             autoScoutEntryDTOS.add(new AutoScoutEntryDTO(
                     title.trim(),
                     link.trim(),
@@ -40,8 +43,7 @@ public class ParserService {
                             .replaceAll(String.valueOf((char) 32), "")
                             .replaceAll(String.valueOf((char) 160), ""),
                     erstzulassung.trim(),
-                    motorleistungInKw.trim()
-            ));
+                    motorleistungInKw.trim(), LocalDate.from(receivedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())));
         });
         return autoScoutEntryDTOS;
     }
