@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,14 +16,16 @@ public class Cronjob {
     private ParserService parserService;
     private BaseEntryRepository baseEntryRepository;
     private ProcessedEntryRepository processedEntryRepository;
+    private MailRepository mailRepository;
 
 
-    public Cronjob(MailService mailService, ParserService parserService, BaseEntryRepository baseEntryRepository, ProcessedEntryRepository processedEntryRepository) {
+    public Cronjob(MailService mailService, ParserService parserService, BaseEntryRepository baseEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository) {
         this.mailService = mailService;
         this.parserService = parserService;
         this.baseEntryRepository = baseEntryRepository;
         this.processedEntryRepository = processedEntryRepository;
 
+        this.mailRepository = mailRepository;
     }
 
     @Value("${host}")
@@ -47,12 +50,25 @@ public class Cronjob {
     }
 
     private void parseMailsAndSaveData() throws Exception {
-        Stream<List<AutoScoutEntryDTO>> listStream = mailService
-                .getMails(host, port, user, pw)
-                .stream()
-                .map(parserService::parseMail);
+        mailService
+                .fetchAndSaveMails(host, port, user, pw);
 
-        listStream.forEach(list -> baseEntryRepository.saveAll(
+        //Stream<List<AutoScoutEntryDTO>> listStream
+       // Stream.Builder<List<AutoScoutEntryDTO>> builder = Stream.builder();
+        List<List<AutoScoutEntryDTO>> listList = new ArrayList<>();
+        mailRepository
+                .findByProcessed(false)
+                .stream()
+                .forEach(mail -> {
+                    mail.setProcessed(true);
+                    mailRepository.save(mail);
+                    List<AutoScoutEntryDTO> autoScoutEntryDTOS = parserService.parseMail(mail);
+                    listList.add(autoScoutEntryDTOS);
+                });
+       // Stream<List<AutoScoutEntryDTO>> listStream = builder.build();
+        //  .map(parserService::parseMail);
+
+        listList.forEach(list -> baseEntryRepository.saveAll(
                 list
                         .stream()
                         .map(dto -> new BaseEntry(dto))
@@ -64,8 +80,6 @@ public class Cronjob {
         baseEntryRepository.findAll()
                 .stream()
                 .forEach(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
-              //  .map(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
-
     }
 
 

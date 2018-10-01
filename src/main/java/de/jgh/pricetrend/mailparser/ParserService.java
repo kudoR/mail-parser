@@ -7,16 +7,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class ParserService {
 
-    public List<AutoScoutEntryDTO> parseMail(MailEntry mailEntry) {
+    public List<AutoScoutEntryDTO> parseMail(Mail mailEntry) {
         ArrayList<AutoScoutEntryDTO> autoScoutEntryDTOS = new ArrayList<>();
 
-        String htmlInput = mailEntry.getContent();
+        String content = mailEntry.getContent();
+        String htmlInput = new String(Base64.getDecoder().decode(content));
         Date receivedDate = mailEntry.getReceivedDate();
 
         Elements elements = Jsoup
