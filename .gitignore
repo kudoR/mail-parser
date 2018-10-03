@@ -1,3 +1,5 @@
 mail-parser.iml
 compiler.xml
 .idea/
+refreshApp.sh
+target/
