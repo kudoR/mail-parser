@@ -4,28 +4,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class Cronjob {
 
     private MailService mailService;
     private ParserService parserService;
-    private BaseEntryRepository baseEntryRepository;
+    private RawEntryRepository rawEntryRepository;
     private ProcessedEntryRepository processedEntryRepository;
     private MailRepository mailRepository;
+    private JobRepository jobRepository;
 
-
-    public Cronjob(MailService mailService, ParserService parserService, BaseEntryRepository baseEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository) {
+    public Cronjob(MailService mailService, ParserService parserService, RawEntryRepository rawEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository, JobRepository jobRepository) {
         this.mailService = mailService;
         this.parserService = parserService;
-        this.baseEntryRepository = baseEntryRepository;
+        this.rawEntryRepository = rawEntryRepository;
         this.processedEntryRepository = processedEntryRepository;
-
         this.mailRepository = mailRepository;
+        this.jobRepository = jobRepository;
     }
 
     @Value("${host}")
@@ -41,46 +38,39 @@ public class Cronjob {
     private String pw;
 
     @Scheduled(fixedRateString = "100000")
-    public void refreshData() throws Exception {
-        System.out.println("Running refreshData");
-
-        parseMailsAndSaveData();
-
-        processBaseEntries();
+    public void scheduledTask() throws Exception {
+        Job job = jobRepository.save(new Job());
+        parseAndProcessMails(job);
+        job.setJobStatus(JobStatus.FINISHED);
+        jobRepository.save(job);
     }
 
-    private void parseMailsAndSaveData() throws Exception {
+    private void parseAndProcessMails(Job job) throws Exception {
+        job.startJob();
+
         mailService
                 .fetchAndSaveMails(host, port, user, pw);
 
-        //Stream<List<AutoScoutEntryDTO>> listStream
-       // Stream.Builder<List<AutoScoutEntryDTO>> builder = Stream.builder();
-        List<List<AutoScoutEntryDTO>> listList = new ArrayList<>();
-        mailRepository
-                .findByProcessed(false)
+        List<Mail> mailsToBeProcessed = mailRepository
+                .findByProcessed(false);
+
+        job.setProcessedEntries(mailsToBeProcessed.size());
+        jobRepository.save(job);
+
+        mailsToBeProcessed
                 .stream()
                 .forEach(mail -> {
                     mail.setProcessed(true);
                     mailRepository.save(mail);
-                    List<AutoScoutEntryDTO> autoScoutEntryDTOS = parserService.parseMail(mail);
-                    listList.add(autoScoutEntryDTOS);
+                    List<RawEntry> rawEntries = parserService.parseMail(mail);
+                    rawEntryRepository.saveAll(rawEntries);
                 });
-       // Stream<List<AutoScoutEntryDTO>> listStream = builder.build();
-        //  .map(parserService::parseMail);
 
-        listList.forEach(list -> baseEntryRepository.saveAll(
-                list
-                        .stream()
-                        .map(dto -> new BaseEntry(dto))
-                        .collect(Collectors.toList())
-        ));
-    }
-
-    private void processBaseEntries() {
-        baseEntryRepository.findAll()
+        rawEntryRepository.findAll()
                 .stream()
                 .forEach(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
-    }
 
+        jobRepository.save(job.finishJob());
+    }
 
 }

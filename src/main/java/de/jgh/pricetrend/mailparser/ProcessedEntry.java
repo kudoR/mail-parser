@@ -20,13 +20,13 @@ public class ProcessedEntry implements Serializable {
     public ProcessedEntry() {
     }
 
-    public ProcessedEntry(BaseEntry baseEntry) {
-        this.id = baseEntry.getId();
-        this.title = baseEntry.getTitle();
-        this.preis = parsePreis(baseEntry.getPreis());
-        this.laufleistung = parseLaufleistung(baseEntry.getLaufleistung());
-        this.erstzulassung = parseErstzulassung(baseEntry);
-        this.motorleistung = parseMotorleistung(baseEntry);
+    public ProcessedEntry(RawEntry rawEntry) {
+        this.id = rawEntry.getId();
+        this.title = rawEntry.getTitle();
+        this.preis = parsePreis(rawEntry.getPreis());
+        this.laufleistung = parseLaufleistung(rawEntry.getLaufleistung());
+        this.erstzulassung = parseErstzulassung(rawEntry);
+        this.motorleistung = parseMotorleistung(rawEntry);
     }
 
     private Long parseLaufleistung(String toParse) {
@@ -41,17 +41,17 @@ public class ProcessedEntry implements Serializable {
         }
     }
 
-    private LocalDate parseErstzulassung(BaseEntry baseEntry) {
-        String erstzulassung = baseEntry.getErstzulassung();
+    private LocalDate parseErstzulassung(RawEntry rawEntry) {
+        String erstzulassung = rawEntry.getErstzulassung();
         if (erstzulassung.length() < 7) return null;
         Integer year = Integer.valueOf(erstzulassung.substring(3, 7));
         Integer month = Integer.valueOf(erstzulassung.substring(0, 2));
         return LocalDate.of(year, month, 1);
     }
 
-    private Integer parseMotorleistung(BaseEntry baseEntry) {
+    private Integer parseMotorleistung(RawEntry rawEntry) {
         try {
-            return Integer.parseInt(baseEntry
+            return Integer.parseInt(rawEntry
                     .getMotorleistung()
                     .replace("kW", "")
                     .trim()

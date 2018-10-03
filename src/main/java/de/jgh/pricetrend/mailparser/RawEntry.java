@@ -1,21 +1,29 @@
 package de.jgh.pricetrend.mailparser;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.LocalDate;
 
-public class AutoScoutEntryDTO {
+@Entity
+public class RawEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
     private String title;
-    @JsonIgnore
     private String link;
     private String preis;
     private String laufleistung;
     private String erstzulassung;
     private String motorleistung;
-    private LocalDate insertDate;
     private LocalDate receivedDate;
 
-    public AutoScoutEntryDTO(String title, String link, String preis, String laufleistung, String erstzulassung, String motorleistung, LocalDate receivedDate) {
+    public RawEntry() {
+    }
+
+    public RawEntry(String title, String link, String preis, String laufleistung, String erstzulassung, String motorleistung, LocalDate receivedDate) {
         this.title = title;
         this.link = link;
         this.preis = preis;
@@ -25,20 +33,20 @@ public class AutoScoutEntryDTO {
         this.receivedDate = receivedDate;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public LocalDate getReceivedDate() {
         return receivedDate;
     }
 
     public void setReceivedDate(LocalDate receivedDate) {
         this.receivedDate = receivedDate;
-    }
-
-    public LocalDate getInsertDate() {
-        return insertDate;
-    }
-
-    public void setInsertDate(LocalDate insertDate) {
-        this.insertDate = insertDate;
     }
 
     public String getTitle() {

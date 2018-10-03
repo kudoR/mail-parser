@@ -1,6 +1,7 @@
 package de.jgh.pricetrend.mailparser;
 
 import com.sun.mail.util.MailSSLSocketFactory;
+import de.jgh.pricetrend.mailparser.MessageProcessorConfig.MessageProcessor;
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,10 +15,12 @@ import java.util.*;
 public class MailService {
 
     private MailRepository mailRepository;
+    private MessageProcessor messageProcessor;
 
     @Autowired
-    public MailService(MailRepository mailRepository) {
+    public MailService(MailRepository mailRepository, MessageProcessor messageProcessor) {
         this.mailRepository = mailRepository;
+        this.messageProcessor = messageProcessor;
     }
 
     public void fetchAndSaveMails(String host, String port, String user, String pw) throws Exception {
@@ -39,30 +42,18 @@ public class MailService {
         Store store = session.getStore("imaps");
         store.connect(host, Integer.valueOf(port), user, pw);
         Folder inbox = store.getFolder("INBOX");
-        inbox.open(Folder.READ_ONLY);
+        inbox.open(Folder.READ_WRITE);
 
         Message[] messages = inbox.getMessages();
 
         Arrays.stream(messages).forEach(message -> {
             try {
-                MimeMessage mimeMessage = new MimeMessageHelper((MimeMessage) message).getMimeMessage();
-                Date receivedDate = mimeMessage.getReceivedDate();
-                String title = mimeMessage.getSubject().substring(2);
-                Address from = mimeMessage.getSender();
-                MimeMessageParser mimeMessageParser = new MimeMessageParser(mimeMessage).parse();
-                String content = mimeMessageParser.getHtmlContent();
-                mailRepository.save(
-                        new Mail(
-                                title,
-                                receivedDate,
-                                from.toString(),
-                                Base64.getEncoder().encodeToString(content.getBytes())
-                        )
-                );
+                messageProcessor.process(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+        inbox.close(true);
     }
 
 }

@@ -14,8 +14,8 @@ import java.util.List;
 @Service
 public class ParserService {
 
-    public List<AutoScoutEntryDTO> parseMail(Mail mailEntry) {
-        ArrayList<AutoScoutEntryDTO> autoScoutEntryDTOS = new ArrayList<>();
+    public List<RawEntry> parseMail(Mail mailEntry) {
+        ArrayList<RawEntry> autoScoutEntries = new ArrayList<>();
 
         String content = mailEntry.getContent();
         String htmlInput = new String(Base64.getDecoder().decode(content));
@@ -36,7 +36,7 @@ public class ParserService {
             link = link.replace("parent.phx.event.mailUrlClicked('", "");
             link = link.replace("'); return true;", "");
             link = link.replace("http://click.rtm.autoscout24.com/?qs=", "");
-            autoScoutEntryDTOS.add(new AutoScoutEntryDTO(
+            autoScoutEntries.add(new RawEntry(
                     title.trim(),
                     link.trim(),
                     preis.trim(),
@@ -47,6 +47,6 @@ public class ParserService {
                     erstzulassung.trim(),
                     motorleistungInKw.trim(), LocalDate.from(receivedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())));
         });
-        return autoScoutEntryDTOS;
+        return autoScoutEntries;
     }
 }
