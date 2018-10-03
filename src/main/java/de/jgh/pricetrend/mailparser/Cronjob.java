@@ -37,7 +37,7 @@ public class Cronjob {
     @Value("${pw}")
     private String pw;
 
-    @Scheduled(fixedRateString = "100000")
+    @Scheduled(fixedRateString = "3600000")
     public void scheduledTask() throws Exception {
         Job job = jobRepository.save(new Job());
         parseAndProcessMails(job);

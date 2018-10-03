@@ -5,7 +5,7 @@
 
 	<groupId>de.jgh.pricetrend</groupId>
 	<artifactId>as-data-fetcher</artifactId>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>mail-parser</name>
