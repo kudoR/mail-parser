@@ -2,3 +2,9 @@ version: '2'
 services:
   fetcher:
     build: .
+    environment:
+    - "SPRING_PROFILES_ACTIVE=production"
+    - "HOST=imap.gmx.net"
+    - "PORT=993"
+    - "USER=${USER}"
+    - "PW=${PW}"
