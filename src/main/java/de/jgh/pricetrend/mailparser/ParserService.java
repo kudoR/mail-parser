@@ -54,7 +54,7 @@ public class ParserService {
     }
 
     public DetailEntry fetchDetailEntry(String inseratId) throws IOException {
-        String url = String.format("http://click.rtm.autoscout24.com/?qs=", inseratId);
+        String url = String.format("http://click.rtm.autoscout24.com/?qs=%s", inseratId);
         Document doc = Jsoup.connect(url).get();
         String encodedDoc = Base64.getEncoder().encodeToString(doc.html().getBytes());
         DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId), encodedDoc);
