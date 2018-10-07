@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -15,14 +16,16 @@ public class Cronjob {
     private ProcessedEntryRepository processedEntryRepository;
     private MailRepository mailRepository;
     private JobRepository jobRepository;
+    private DetailEntryRepository detailEntryRepository;
 
-    public Cronjob(MailService mailService, ParserService parserService, RawEntryRepository rawEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository, JobRepository jobRepository) {
+    public Cronjob(MailService mailService, ParserService parserService, RawEntryRepository rawEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository, JobRepository jobRepository, DetailEntryRepository detailEntryRepository) {
         this.mailService = mailService;
         this.parserService = parserService;
         this.rawEntryRepository = rawEntryRepository;
         this.processedEntryRepository = processedEntryRepository;
         this.mailRepository = mailRepository;
         this.jobRepository = jobRepository;
+        this.detailEntryRepository = detailEntryRepository;
     }
 
     @Value("${host}")
@@ -73,4 +76,19 @@ public class Cronjob {
         jobRepository.save(job.finishJob());
     }
 
+    @Scheduled(fixedRateString = "86400000")
+    public void fetchDetailEntries() {
+        rawEntryRepository
+                .findAll()
+                .stream()
+                .forEach(rawEntry -> fetchDetailEntry(rawEntry));
+    }
+
+    private void fetchDetailEntry(RawEntry rawEntry) {
+        try {
+            parserService.fetchDetailEntry(rawEntry.getLink());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

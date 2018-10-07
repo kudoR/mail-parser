@@ -1,18 +1,21 @@
 package de.jgh.pricetrend.mailparser;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ParserService {
+
+    @Autowired
+    private DetailEntryRepository detailEntryRepository;
 
     public List<RawEntry> parseMail(Mail mailEntry) {
         ArrayList<RawEntry> autoScoutEntries = new ArrayList<>();
@@ -48,5 +51,13 @@ public class ParserService {
                     motorleistungInKw.trim(), LocalDate.from(receivedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())));
         });
         return autoScoutEntries;
+    }
+
+    public DetailEntry fetchDetailEntry(String inseratId) throws IOException {
+        String url = String.format("http://click.rtm.autoscout24.com/?qs=", inseratId);
+        Document doc = Jsoup.connect(url).get();
+
+        DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId), doc.html());
+        return detailEntryRepository.save(detailEntry);
     }
 }
