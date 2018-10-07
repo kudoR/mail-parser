@@ -29,5 +29,5 @@ spring:
   jpa:
     database-plattform: org.hibernate.dialect.MySQL5Dialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
 
