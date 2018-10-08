@@ -40,7 +40,7 @@ public class Cronjob {
     @Value("${pw}")
     private String pw;
 
-    @Scheduled(fixedRateString = "3600000")
+     @Scheduled(fixedRateString = "3600000")
     public void scheduledTask() throws Exception {
         Job job = jobRepository.save(new Job());
         parseAndProcessMails(job);
@@ -77,11 +77,22 @@ public class Cronjob {
     }
 
     @Scheduled(fixedRateString = "86400000")
-    public void fetchDetailEntries() {
+    public void fetchAndProcessDetailEntries() {
         rawEntryRepository
                 .findAll()
                 .stream()
-                .forEach(rawEntry -> fetchDetailEntry(rawEntry));
+                .forEach(this::fetchDetailEntry);
+
+        DetailEntry detailEntry = detailEntryRepository.findTopByProcessed(false);
+        processDetailEntryRecursive(detailEntry);
+    }
+
+    private void processDetailEntryRecursive(DetailEntry detailEntry) {
+        parserService.parseAndProcessDetailEntry(detailEntry);
+        DetailEntry next = detailEntryRepository.findTopByProcessed(false);
+        if (next != null) {
+            processDetailEntryRecursive(next);
+        }
     }
 
     private void fetchDetailEntry(RawEntry rawEntry) {

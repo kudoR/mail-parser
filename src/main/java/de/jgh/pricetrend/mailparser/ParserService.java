@@ -60,4 +60,24 @@ public class ParserService {
         DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId), encodedDoc);
         return detailEntryRepository.save(detailEntry);
     }
+
+    public void parseAndProcessDetailEntry(DetailEntry detailEntry) {
+        String documentHtml = new String(Base64.getDecoder().decode(detailEntry.getDocumentHtml()));
+
+        Document document = Jsoup
+                .parse(documentHtml);
+
+        String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
+        try {
+            priceAsString = priceAsString
+                    .replace(",", "")
+                    .replace(".", "")
+                    .replace("-", "")
+                    .replace("€", "");
+            detailEntry.setPrice(Double.valueOf(priceAsString));
+        } catch (Exception e) {
+        }
+        detailEntry.setProcessed(true);
+        detailEntryRepository.save(detailEntry);
+    }
 }
