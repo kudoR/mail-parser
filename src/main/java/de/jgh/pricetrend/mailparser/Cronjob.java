@@ -76,7 +76,7 @@ public class Cronjob {
         jobRepository.save(job.finishJob());
     }
 
-    @Scheduled(fixedRateString = "86400000")
+    // currently deactivated as it kills the nas... @Scheduled(fixedRateString = "86400000")
     public void fetchAndProcessDetailEntries() {
         rawEntryRepository
                 .findAll()
