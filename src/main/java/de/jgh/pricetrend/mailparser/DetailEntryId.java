@@ -17,4 +17,8 @@ public class DetailEntryId implements Serializable {
         this.inseratId = inseratId;
         this.dateTime = LocalDateTime.now();
     }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 }

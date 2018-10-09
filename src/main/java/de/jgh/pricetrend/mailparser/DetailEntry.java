@@ -6,22 +6,15 @@ import javax.persistence.*;
 public class DetailEntry {
     @EmbeddedId
     private DetailEntryId id;
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private String documentHtml;
+
     private Double price;
     private boolean processed;
 
     public DetailEntry() {
     }
 
-    public DetailEntry(DetailEntryId id, String documentHtml) {
+    public DetailEntry(DetailEntryId id) {
         this.id = id;
-        this.documentHtml = documentHtml;
-    }
-
-    public String getDocumentHtml() {
-        return documentHtml;
     }
 
     public Double getPrice() {
@@ -35,4 +28,9 @@ public class DetailEntry {
     public void setProcessed(boolean processed) {
         this.processed = processed;
     }
+
+    public DetailEntryId getId() {
+        return id;
+    }
+
 }

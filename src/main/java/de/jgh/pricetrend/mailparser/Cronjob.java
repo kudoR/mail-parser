@@ -76,24 +76,14 @@ public class Cronjob {
         jobRepository.save(job.finishJob());
     }
 
-    // currently deactivated as it kills the nas... @Scheduled(fixedRateString = "86400000")
+    @Scheduled(fixedRateString = "86400000")
     public void fetchAndProcessDetailEntries() {
         rawEntryRepository
                 .findAll()
                 .stream()
                 .forEach(this::fetchDetailEntry);
-
-        DetailEntry detailEntry = detailEntryRepository.findTopByProcessed(false);
-        processDetailEntryRecursive(detailEntry);
     }
 
-    private void processDetailEntryRecursive(DetailEntry detailEntry) {
-        parserService.parseAndProcessDetailEntry(detailEntry);
-        DetailEntry next = detailEntryRepository.findTopByProcessed(false);
-        if (next != null) {
-            processDetailEntryRecursive(next);
-        }
-    }
 
     private void fetchDetailEntry(RawEntry rawEntry) {
         try {

@@ -53,19 +53,11 @@ public class ParserService {
         return autoScoutEntries;
     }
 
-    public DetailEntry fetchDetailEntry(String inseratId) throws IOException {
+    public void fetchDetailEntry(String inseratId) throws IOException {
+        boolean createNewDetailEntry = false;
+
         String url = String.format("http://click.rtm.autoscout24.com/?qs=%s", inseratId);
-        Document doc = Jsoup.connect(url).get();
-        String encodedDoc = Base64.getEncoder().encodeToString(doc.html().getBytes());
-        DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId), encodedDoc);
-        return detailEntryRepository.save(detailEntry);
-    }
-
-    public void parseAndProcessDetailEntry(DetailEntry detailEntry) {
-        String documentHtml = new String(Base64.getDecoder().decode(detailEntry.getDocumentHtml()));
-
-        Document document = Jsoup
-                .parse(documentHtml);
+        Document document = Jsoup.connect(url).get();
 
         String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
         try {
@@ -74,10 +66,27 @@ public class ParserService {
                     .replace(".", "")
                     .replace("-", "")
                     .replace("€", "");
-            detailEntry.setPrice(Double.valueOf(priceAsString));
+            List<DetailEntry> byIdInseratId = detailEntryRepository.findByIdInseratId(inseratId);
+
+            Double parsedPrice = Double.valueOf(priceAsString);
+
+            if (!byIdInseratId.isEmpty()) {
+                Optional<DetailEntry> max = byIdInseratId.stream().max(Comparator.comparing(o -> o.getId().getDateTime()));
+                if (!max.isPresent() || !max.get().getPrice().equals(parsedPrice)) {
+                    createNewDetailEntry = true;
+                }
+            } else {
+                createNewDetailEntry = true;
+            }
+
+            if (createNewDetailEntry) {
+                DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId));
+                detailEntry.setPrice(parsedPrice);
+                detailEntryRepository.save(detailEntry);
+            }
+
         } catch (Exception e) {
         }
-        detailEntry.setProcessed(true);
-        detailEntryRepository.save(detailEntry);
     }
+
 }
