@@ -60,6 +60,7 @@ public class ParserService {
         Document document = Jsoup.connect(url).get();
 
         String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
+        String model = document.getElementsByClass("cldt-detail-makemodel").get(0).text();
         try {
             priceAsString = priceAsString
                     .replace(",", "")
@@ -82,6 +83,7 @@ public class ParserService {
             if (createNewDetailEntry) {
                 DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId));
                 detailEntry.setPrice(parsedPrice);
+                detailEntry.setModel(model);
                 detailEntryRepository.save(detailEntry);
             }
 

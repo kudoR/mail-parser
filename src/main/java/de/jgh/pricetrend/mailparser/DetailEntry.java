@@ -9,6 +9,7 @@ public class DetailEntry {
 
     private Double price;
     private boolean processed;
+    private String model;
 
     public DetailEntry() {
     }
@@ -33,4 +34,11 @@ public class DetailEntry {
         return id;
     }
 
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
 }
