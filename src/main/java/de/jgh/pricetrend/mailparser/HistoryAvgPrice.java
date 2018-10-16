@@ -18,5 +18,6 @@ public class HistoryAvgPrice {
 
     public HistoryAvgPrice(BigDecimal price) {
         this.price = price;
+        this.date = LocalDate.now();
     }
 }
