@@ -79,7 +79,7 @@ public class Cronjob {
                     rawEntryRepository.saveAll(rawEntries);
                 });
 
-        rawEntryRepository.findAll()
+        rawEntryRepository.findByOffline(false)
                 .stream()
                 .forEach(baseEntry -> processedEntryRepository.save(new ProcessedEntry(baseEntry)));
 

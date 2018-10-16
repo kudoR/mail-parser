@@ -19,6 +19,7 @@ public class RawEntry {
     private String erstzulassung;
     private String motorleistung;
     private LocalDate receivedDate;
+    private boolean offline;
 
     public RawEntry() {
     }
@@ -31,6 +32,12 @@ public class RawEntry {
         this.erstzulassung = erstzulassung;
         this.motorleistung = motorleistung;
         this.receivedDate = receivedDate;
+
+    }
+
+    public RawEntry setOffline() {
+        this.offline = true;
+        return this;
     }
 
     public Long getId() {

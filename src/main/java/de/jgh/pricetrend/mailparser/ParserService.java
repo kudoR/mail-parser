@@ -1,5 +1,6 @@
 package de.jgh.pricetrend.mailparser;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -16,6 +17,9 @@ public class ParserService {
 
     @Autowired
     private DetailEntryRepository detailEntryRepository;
+
+    @Autowired
+    private RawEntryRepository rawEntryRepository;
 
     public List<RawEntry> parseMail(Mail mailEntry) {
         ArrayList<RawEntry> autoScoutEntries = new ArrayList<>();
@@ -57,38 +61,47 @@ public class ParserService {
         boolean createNewDetailEntry = false;
 
         String url = String.format("http://click.rtm.autoscout24.com/?qs=%s", inseratId);
-        Document document = Jsoup.connect(url).get();
-
-        String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
-        String model = document.getElementsByClass("cldt-detail-makemodel").get(0).text();
         try {
-            priceAsString = priceAsString
-                    .replace(",", "")
-                    .replace(".", "")
-                    .replace("-", "")
-                    .replace("€", "");
-            List<DetailEntry> byIdInseratId = detailEntryRepository.findByIdInseratId(inseratId);
+            Document document = Jsoup.connect(url).get();
+            String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
+            String model = document.getElementsByClass("cldt-detail-makemodel").get(0).text();
+            try {
+                priceAsString = priceAsString
+                        .replace(",", "")
+                        .replace(".", "")
+                        .replace("-", "")
+                        .replace("€", "");
+                List<DetailEntry> byIdInseratId = detailEntryRepository.findByIdInseratId(inseratId);
 
-            Double parsedPrice = Double.valueOf(priceAsString);
+                Double parsedPrice = Double.valueOf(priceAsString);
 
-            if (!byIdInseratId.isEmpty()) {
-                Optional<DetailEntry> max = byIdInseratId.stream().max(Comparator.comparing(o -> o.getId().getDateTime()));
-                if (!max.isPresent() || !max.get().getPrice().equals(parsedPrice)) {
+                if (!byIdInseratId.isEmpty()) {
+                    Optional<DetailEntry> max = byIdInseratId.stream().max(Comparator.comparing(o -> o.getId().getDateTime()));
+                    if (!max.isPresent() || !max.get().getPrice().equals(parsedPrice)) {
+                        createNewDetailEntry = true;
+                    }
+                } else {
                     createNewDetailEntry = true;
                 }
-            } else {
-                createNewDetailEntry = true;
-            }
 
-            if (createNewDetailEntry) {
-                DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId));
-                detailEntry.setPrice(parsedPrice);
-                detailEntry.setModel(model);
-                detailEntryRepository.save(detailEntry);
-            }
+                if (createNewDetailEntry) {
+                    DetailEntry detailEntry = new DetailEntry(new DetailEntryId(inseratId));
+                    detailEntry.setPrice(parsedPrice);
+                    detailEntry.setModel(model);
+                    detailEntryRepository.save(detailEntry);
+                }
 
-        } catch (Exception e) {
+            } catch (Exception e) {
+            }
+        } catch (HttpStatusException e) {
+            rawEntryRepository
+                    .findByLink(inseratId)
+                    .stream()
+                    .map(rawEntry -> rawEntry.setOffline())
+                    .forEach(rawEntryRepository::save);
         }
+
+
     }
 
 }
