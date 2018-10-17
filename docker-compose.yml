@@ -8,3 +8,5 @@ services:
     - "PORT=993"
     - "USER=${USER}"
     - "PW=${PW}"
+    ports:
+    - 8081:8081
