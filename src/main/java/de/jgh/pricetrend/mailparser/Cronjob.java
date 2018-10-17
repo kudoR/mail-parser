@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -17,18 +16,14 @@ public class Cronjob {
     private ProcessedEntryRepository processedEntryRepository;
     private MailRepository mailRepository;
     private JobRepository jobRepository;
-    private DetailEntryRepository detailEntryRepository;
-    private HistoryAvgPriceRepository historyAvgPriceRepository;
 
-    public Cronjob(MailService mailService, ParserService parserService, RawEntryRepository rawEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository, JobRepository jobRepository, DetailEntryRepository detailEntryRepository, HistoryAvgPriceRepository historyAvgPriceRepository) {
+    public Cronjob(MailService mailService, ParserService parserService, RawEntryRepository rawEntryRepository, ProcessedEntryRepository processedEntryRepository, MailRepository mailRepository, JobRepository jobRepository) {
         this.mailService = mailService;
         this.parserService = parserService;
         this.rawEntryRepository = rawEntryRepository;
         this.processedEntryRepository = processedEntryRepository;
         this.mailRepository = mailRepository;
         this.jobRepository = jobRepository;
-        this.detailEntryRepository = detailEntryRepository;
-        this.historyAvgPriceRepository = historyAvgPriceRepository;
     }
 
     @Value("${host}")
@@ -42,13 +37,6 @@ public class Cronjob {
 
     @Value("${pw}")
     private String pw;
-
-    @Scheduled(fixedRateString = "3600000")
-    public void saveAvgPrices() {
-        BigDecimal actualAvgPrice = processedEntryRepository.getActualAvgPrice();
-        HistoryAvgPrice historyAvgPrice = new HistoryAvgPrice(actualAvgPrice);
-        historyAvgPriceRepository.save(historyAvgPrice);
-    }
 
     @Scheduled(fixedRateString = "3600000")
     public void scheduledTask() throws Exception {
