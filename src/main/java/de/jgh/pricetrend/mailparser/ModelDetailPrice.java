@@ -1,13 +1,11 @@
 package de.jgh.pricetrend.mailparser;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "model_detail_price")
 public class ModelDetailPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
