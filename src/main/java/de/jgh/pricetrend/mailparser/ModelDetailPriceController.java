@@ -26,7 +26,7 @@ public class ModelDetailPriceController {
     private ModelDetailPriceRepository modelDetailPriceRepository;
 
     @GetMapping("/evaluation/{model}/{mileage}/{registration}/{price}")
-    public Object evaluation(@PathVariable("model") String model,
+    public HashMap<String, Double> evaluation(@PathVariable("model") String model,
                              @PathVariable("mileage") String mileage,
                              @PathVariable("registration") String registration,
                              @PathVariable("price") String price) {

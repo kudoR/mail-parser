@@ -46,4 +46,8 @@ public class ModelDetailPrice {
     public void setModel(String model) {
         this.model = model;
     }
+
+    public Long getId() {
+        return id;
+    }
 }
