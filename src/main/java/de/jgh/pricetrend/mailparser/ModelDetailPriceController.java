@@ -8,20 +8,82 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.*;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static de.jgh.pricetrend.mailparser.PercentileType.ERSTZULASSUNG;
+import static de.jgh.pricetrend.mailparser.PercentileType.LAUFLEISTUNG;
+import static de.jgh.pricetrend.mailparser.PercentileType.PREIS;
 
 @RestController
 public class ModelDetailPriceController {
+
     @Autowired
     private ModelDetailPriceService modelDetailPriceService;
 
     @Autowired
     private ModelDetailPriceRepository modelDetailPriceRepository;
 
+    @GetMapping("/evaluation/{model}/{mileage}/{registration}/{price}")
+    public Object evaluation(@PathVariable("model") String model,
+                             @PathVariable("mileage") String mileage,
+                             @PathVariable("registration") String registration,
+                             @PathVariable("price") String price) {
+        CalculatedPercentile mileagePercentile = mileagePercentile(model, mileage);
+        CalculatedPercentile registrationPercentile = registrationPercentile(model, registration);
+        CalculatedPercentile pricePercentile = pricePercentile(model, price);
+
+        int mileagePercentileValue = mileagePercentile.getLabel().getPercentile();
+        int registrationPercentileValue = registrationPercentile.getLabel().getPercentile();
+
+        double evaluation = 0.75 * mileagePercentileValue + 0.25 * registrationPercentileValue;
+        HashMap<String, Double> evalResult = new HashMap<>();
+        evalResult.put("evaluatedNiveau", evaluation);
+
+
+        int givenPrice = pricePercentile.getLabel().getPercentile();
+        evalResult.put("priceNiveau", new Double(givenPrice));
+
+
+        return evalResult;
+    }
+
+    @GetMapping("/percentile/mileage/{model}/{mileage}")
+    public CalculatedPercentile mileagePercentile(@PathVariable("model") String model, @PathVariable("mileage") String mileage) {
+        List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
+        Set<CalculatedPercentile> mileagePercentiles = percentilesForModel.get(0);
+        return mileagePercentiles
+                .stream()
+                .filter(calculatedPercentile -> calculatedPercentile.getDoubleValue() > Double.valueOf(mileage))
+                .min(Comparator.comparingDouble(value -> value.getDoubleValue()))
+                .orElse(new CalculatedPercentile(LAUFLEISTUNG, -1, PercentileEnum.MAX));
+    }
+
+    @GetMapping("/percentile/registration/{model}/{registration}")
+    public CalculatedPercentile registrationPercentile(@PathVariable("model") String model, @PathVariable("registration") String registration) {
+        List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
+        Set<CalculatedPercentile> registrationPercentiles = percentilesForModel.get(1);
+        return registrationPercentiles
+                .stream()
+                .filter(calculatedPercentile -> calculatedPercentile.getLocalDateValue().compareTo(LocalDateTime.parse(registration)) > 1)
+                .min(Comparator.comparing(value -> value.getLocalDateValue()))
+                .orElse(new CalculatedPercentile(ERSTZULASSUNG, -1, PercentileEnum.MAX));
+    }
+
+    @GetMapping("/percentile/price/{model}/{price}")
+    public CalculatedPercentile pricePercentile(@PathVariable("model") String model, @PathVariable("price") String price) {
+        List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
+        Set<CalculatedPercentile> pricePercentiles = percentilesForModel.get(2);
+        return pricePercentiles
+                .stream()
+                .filter(calculatedPercentile -> calculatedPercentile.getDoubleValue() > Double.valueOf(price))
+                .min(Comparator.comparingDouble(value -> value.getDoubleValue()))
+                .orElse(new CalculatedPercentile(PREIS, -1, PercentileEnum.MAX));
+    }
+
     @GetMapping("/percentiles/{model}")
-    public Object getPercentilesForModel(@PathVariable("model") String model) {
+    public List<Set<CalculatedPercentile>> getPercentilesForModel(@PathVariable("model") String model) {
         List<ModelDetailPrice> byModel = modelDetailPriceRepository.findByModel(model);
 
         Function<ModelDetailPrice, Long> mapModelDetailToLaufleistung = modelDetailPrice -> modelDetailPrice.getLaufleistung();
@@ -32,25 +94,23 @@ public class ModelDetailPriceController {
         Function<BigDecimal, Double> mapBigDecimalToDouble = bigDecimal -> bigDecimal.doubleValue();
         Function<LocalDate, Double> mapLocalDateToDouble = localDate -> functionMapLocalDateToDouble(localDate);
 
-        HashMap<Integer, Double> laufleistungPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToLaufleistung, mapLongToDouble);
-        HashMap<Integer, Double> preisPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToPrice, mapBigDecimalToDouble);
-        HashMap<Integer, Double> ezPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToLocalDate, mapLocalDateToDouble);
+        Set<CalculatedPercentile> laufleistungPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToLaufleistung, mapLongToDouble, LAUFLEISTUNG);
+        Set<CalculatedPercentile> ezPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToLocalDate, mapLocalDateToDouble, ERSTZULASSUNG);
+        Set<CalculatedPercentile> preisPercentiles = modelDetailPriceService.getPercentilesByModel(byModel, mapModelDetailToPrice, mapBigDecimalToDouble, PREIS);
 
-        HashMap<Integer, LocalDateTime> ezPercentilesFormatted = postProcessPercentiles(ezPercentiles);
-
-        HashMap<String, HashMap> result = new HashMap<>();
-
-        result.put("pricePercentiles", preisPercentiles);
-        result.put("laufleistungPercentiles", laufleistungPercentiles);
-        result.put("erstzulassungPercentiles", ezPercentilesFormatted);
-
-        return result;
+        return Arrays.asList(laufleistungPercentiles, postProcessPercentiles(ezPercentiles), preisPercentiles);
     }
 
-    private HashMap<Integer, LocalDateTime> postProcessPercentiles(HashMap<Integer, Double> ezPercentiles) {
-        HashMap<Integer, LocalDateTime> result = new HashMap<>();
-        ezPercentiles.forEach((integer, aDouble) -> result.put(integer, LocalDateTime.ofInstant(Instant.ofEpochMilli(aDouble.longValue()), ZoneId.systemDefault())));
-        return result;
+    private Set<CalculatedPercentile> postProcessPercentiles(Set<CalculatedPercentile> percentiles) {
+        return percentiles
+                .stream()
+                .map(calculatedPercentile -> new CalculatedPercentile(
+                                calculatedPercentile.getPercentileType(),
+                                LocalDateTime.ofInstant(Instant.ofEpochMilli(calculatedPercentile.getDoubleValue().longValue()), ZoneId.systemDefault()),
+                                calculatedPercentile.getLabel()
+                        )
+                )
+                .collect(Collectors.toSet());
     }
 
     private Double functionMapLocalDateToDouble(LocalDate localDate) {
