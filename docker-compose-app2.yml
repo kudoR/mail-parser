@@ -3,7 +3,7 @@ services:
   fetcher:
     build: .
     environment:
-    - "SPRING_PROFILES_ACTIVE=production,app1"
+    - "SPRING_PROFILES_ACTIVE=production,app2"
     - "HOST=imap.gmx.net"
     - "PORT=993"
     - "USER=${USER}"
