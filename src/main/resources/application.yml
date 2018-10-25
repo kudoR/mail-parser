@@ -33,7 +33,7 @@ spring:
 
 ---
 spring:
-  profiles: production
+  profiles: app1
 
   h2:
     console:
@@ -43,6 +43,25 @@ spring:
     url: jdbc:mysql://192.168.178.67:3306/app1
     username: app1
     password: app1
+    driverClassName: org.mariadb.jdbc.Driver
+
+  jpa:
+    database-plattform: org.hibernate.dialect.MySQL5Dialect
+    hibernate:
+      ddl-auto: update
+
+---
+spring:
+  profiles: app2
+
+  h2:
+    console:
+      enabled: false
+
+  datasource:
+    url: jdbc:mysql://192.168.178.67:3306/app2
+    username: app2
+    password: app2
     driverClassName: org.mariadb.jdbc.Driver
 
   jpa:
