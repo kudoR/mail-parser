@@ -26,10 +26,7 @@ public class ReportController {
         HashMap<Long, Double> report = new HashMap<>();
 
         Iterable<ModelDetailPrice> all = modelDetailPriceRepository.findAll();
-        Stream<Iterable<ModelDetailPrice>> iterableStream = Stream.of(all);
-        System.out.println("to process: " + iterableStream.count());
         all.forEach(modelDetailPrice -> {
-
             Long id = modelDetailPrice.getId();
             String model = modelDetailPrice.getModel();
 
