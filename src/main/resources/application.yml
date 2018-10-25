@@ -60,8 +60,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://192.168.178.67:3306/app2
-    username: app2
-    password: app2
+    username: app1
+    password: app1
     driverClassName: org.mariadb.jdbc.Driver
 
   jpa:
