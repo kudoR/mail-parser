@@ -8,5 +8,6 @@ services:
     - "PORT=993"
     - "USER=${USER}"
     - "PW=${PW}"
+    - "PARSER_DIALECT=car"
     ports:
     - 8182:8081

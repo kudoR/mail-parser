@@ -5,12 +5,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+
+import static de.jgh.pricetrend.mailparser.AnbieterType.GEWERBLICH;
+import static de.jgh.pricetrend.mailparser.AnbieterType.PRIVAT;
 
 @Service
 public class ParserService {
@@ -20,6 +24,9 @@ public class ParserService {
 
     @Autowired
     private RawEntryRepository rawEntryRepository;
+
+    @Value("${parser_dialect}")
+    private String parserDialect;
 
     public List<RawEntry> parseMail(Mail mailEntry) {
         ArrayList<RawEntry> autoScoutEntries = new ArrayList<>();
@@ -67,9 +74,15 @@ public class ParserService {
             String model = document.getElementsByClass("cldt-detail-makemodel").get(0).text();
             Elements vendor_contact_box = document.body().getElementsByClass("cldt-vendor-contact-box");
 
-            String anbieterType = vendor_contact_box.get(1).child(0).text();
-            String city = vendor_contact_box.get(1).child(1).child(0).text();
-            String country = vendor_contact_box.get(1).child(1).child(1).text();
+            AnbieterType anbieterType = document.body().getElementsByClass("cldt-stage-vendor-text").text().contains("Gewerblicher Anbieter") ? GEWERBLICH : PRIVAT;
+
+            String zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
+            if (parserDialect.equals("bike")) {
+                zipNCity = vendor_contact_box.get(1).child(1).child(0).text();
+            }
+
+            String zip = zipNCity.split(" ")[0];
+            String city = zipNCity.split(" ")[1];
 
             try {
                 priceAsString = priceAsString
@@ -96,7 +109,7 @@ public class ParserService {
                     detailEntry.setModel(model);
                     detailEntry.setAnbieterType(anbieterType);
                     detailEntry.setCity(city);
-                    detailEntry.setCountry(country);
+                    detailEntry.setZip(zip);
                     detailEntryRepository.save(detailEntry);
                 }
 

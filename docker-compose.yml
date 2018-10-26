@@ -8,5 +8,6 @@ services:
     - "PORT=993"
     - "USER=${USER}"
     - "PW=${PW}"
+    - "PARSER_DIALECT=bike"
     ports:
     - 8181:8081

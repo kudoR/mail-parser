@@ -10,9 +10,9 @@ public class DetailEntry {
     private Double price;
     private boolean processed;
     private String model;
-    private String anbieterType;
+    private AnbieterType anbieterType;
+    private String zip;
     private String city;
-    private String country;
 
     public DetailEntry() {
     }
@@ -21,11 +21,12 @@ public class DetailEntry {
         this.id = id;
     }
 
-    public String getAnbieterType() {
+
+    public AnbieterType getAnbieterType() {
         return anbieterType;
     }
 
-    public void setAnbieterType(String anbieterType) {
+    public void setAnbieterType(AnbieterType anbieterType) {
         this.anbieterType = anbieterType;
     }
 
@@ -37,12 +38,12 @@ public class DetailEntry {
         this.city = city;
     }
 
-    public String getCountry() {
-        return country;
+    public String getZip() {
+        return zip;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setZip(String zip) {
+        this.zip = zip;
     }
 
     public Double getPrice() {
