@@ -76,9 +76,9 @@ public class ParserService {
 
             AnbieterType anbieterType = document.body().getElementsByClass("cldt-stage-vendor-text").text().contains("Gewerblicher Anbieter") ? GEWERBLICH : PRIVAT;
 
-            String zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
-            if (parserDialect.equals("bike")) {
-                zipNCity = vendor_contact_box.get(1).child(1).child(0).text();
+            String zipNCity = vendor_contact_box.get(1).child(1).child(0).text();
+            if (parserDialect.equals("car")) {
+                zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
             }
 
             String zip = zipNCity.split(" ")[0];
