@@ -3,6 +3,7 @@ package de.jgh.pricetrend.mailparser;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import java.util.*;
 
 import static de.jgh.pricetrend.mailparser.AnbieterType.GEWERBLICH;
 import static de.jgh.pricetrend.mailparser.AnbieterType.PRIVAT;
+import static de.jgh.pricetrend.mailparser.Artikelzustand.*;
 
 @Service
 public class ParserService {
@@ -72,9 +74,10 @@ public class ParserService {
             Document document = Jsoup.connect(url).get();
             String priceAsString = document.getElementsByClass("cldt-price").get(0).text();
             String model = document.getElementsByClass("cldt-detail-makemodel").get(0).text();
-            Elements vendor_contact_box = document.body().getElementsByClass("cldt-vendor-contact-box");
+            Element body = document.body();
+            Elements vendor_contact_box = body.getElementsByClass("cldt-vendor-contact-box");
 
-            AnbieterType anbieterType = document.body().getElementsByClass("cldt-stage-vendor-text").text().contains("Gewerblicher Anbieter") ? GEWERBLICH : PRIVAT;
+            AnbieterType anbieterType = body.getElementsByClass("cldt-stage-vendor-text").text().contains("Gewerblicher Anbieter") ? GEWERBLICH : PRIVAT;
 
             String zipNCity = vendor_contact_box.get(1).child(1).child(0).text();
             if (parserDialect.equals("car")) {
@@ -95,6 +98,21 @@ public class ParserService {
             String city = "";
             try {
                 city = zipNCity.split(" ")[1];
+            } catch (Exception e) {
+
+            }
+
+            boolean unfall = false;
+            try {
+                unfall = body.getElementsByClass("sc-font-s cldt-stage-att-description").get(1).text().contains("Unfallfahrzeug");
+            } catch (Exception e) {
+
+            }
+            Artikelzustand gebrauchtNeu = GEBRAUCHT;
+            try {
+                gebrauchtNeu =
+                        !body.getElementsByClass("sc-font-s cldt-stage-att-description").get(0).text().contains("Gebraucht") ?
+                                NEU : GEBRAUCHT;
             } catch (Exception e) {
 
             }
@@ -125,6 +143,8 @@ public class ParserService {
                     detailEntry.setAnbieterType(anbieterType);
                     detailEntry.setCity(city);
                     detailEntry.setZip(zip);
+                    detailEntry.setArtikelzustand(gebrauchtNeu);
+                    detailEntry.setUnfall(unfall);
                     detailEntryRepository.save(detailEntry);
                 }
 

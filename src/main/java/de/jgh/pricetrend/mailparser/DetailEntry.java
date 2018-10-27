@@ -13,6 +13,8 @@ public class DetailEntry {
     private AnbieterType anbieterType;
     private String zip;
     private String city;
+    private Artikelzustand artikelzustand;
+    private boolean unfall;
 
     public DetailEntry() {
     }
@@ -68,5 +70,21 @@ public class DetailEntry {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public Artikelzustand getArtikelzustand() {
+        return artikelzustand;
+    }
+
+    public void setArtikelzustand(Artikelzustand artikelzustand) {
+        this.artikelzustand = artikelzustand;
+    }
+
+    public boolean isUnfall() {
+        return unfall;
+    }
+
+    public void setUnfall(boolean unfall) {
+        this.unfall = unfall;
     }
 }
