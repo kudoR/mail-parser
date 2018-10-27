@@ -81,8 +81,18 @@ public class ParserService {
                 zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
             }
 
-            String zip = zipNCity.split(" ")[0];
-            String city = zipNCity.split(" ")[1];
+            String zip = "";
+            try {
+                zip = zipNCity.split(" ")[0];
+            } catch (Exception e) {
+
+            }
+            String city = "";
+            try {
+                city = zipNCity.split(" ")[1];
+            } catch (Exception e) {
+
+            }
 
             try {
                 priceAsString = priceAsString
