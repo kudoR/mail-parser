@@ -78,7 +78,12 @@ public class ParserService {
 
             String zipNCity = vendor_contact_box.get(1).child(1).child(0).text();
             if (parserDialect.equals("car")) {
-                zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
+                try {
+                    zipNCity = vendor_contact_box.get(1).child(1).child(2).text();
+
+                } catch (Exception e) {
+
+                }
             }
 
             String zip = "";
