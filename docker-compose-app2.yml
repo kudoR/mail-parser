@@ -10,4 +10,4 @@ services:
     - "PW=${PW}"
     - "PARSER_DIALECT=car"
     ports:
-    - 8182:8081
+    - 8282:8081

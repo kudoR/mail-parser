@@ -10,4 +10,4 @@ services:
     - "PW=${PW}"
     - "PARSER_DIALECT=bike"
     ports:
-    - 8181:8081
+    - 8281:8081

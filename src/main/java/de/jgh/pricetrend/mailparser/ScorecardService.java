@@ -53,6 +53,10 @@ public class ScorecardService {
                     HashMap<String, Double> evaluation = percentileCalcService.evaluation(model, String.valueOf(laufleistung), String.valueOf(erstzulassung), String.valueOf(preis));
                     Double evaluatedNiveau = evaluation.get("evaluatedNiveau");
                     Double priceNiveau = evaluation.get("priceNiveau");
+                    System.out.println("Calculating Score for id: " + id);
+                    System.out.println("Result: ");
+                    System.out.println("evaluation: " + evaluatedNiveau);
+                    System.out.println("given price: " + priceNiveau);
                     ScoreCard scoreCard = new ScoreCard(id, evaluatedNiveau, priceNiveau);
                     scoreCardRepository.save(scoreCard);
                 }
