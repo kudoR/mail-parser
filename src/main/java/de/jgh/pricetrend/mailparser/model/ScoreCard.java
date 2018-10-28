@@ -8,14 +8,14 @@ public class ScoreCard {
     @Id
     private Long id;
 
-    private Double pricePercentile;
-    private Double registrationPercentile;
-    private Double mileagePercentile;
+    private Integer pricePercentile;
+    private Integer registrationPercentile;
+    private Integer mileagePercentile;
 
     public ScoreCard() {
     }
 
-    public ScoreCard(Long id, Double pricePercentile, Double registrationPercentile, Double mileagePercentile) {
+    public ScoreCard(Long id, Integer pricePercentile, Integer registrationPercentile, Integer mileagePercentile) {
         this.id = id;
         this.pricePercentile = pricePercentile;
         this.registrationPercentile = registrationPercentile;
@@ -30,28 +30,27 @@ public class ScoreCard {
         this.id = id;
     }
 
-    public Double getPricePercentile() {
+    public Integer getPricePercentile() {
         return pricePercentile;
     }
 
-    public void setPricePercentile(Double pricePercentile) {
+    public void setPricePercentile(Integer pricePercentile) {
         this.pricePercentile = pricePercentile;
     }
 
-    public Double getRegistrationPercentile() {
+    public Integer getRegistrationPercentile() {
         return registrationPercentile;
     }
 
-    public void setRegistrationPercentile(Double registrationPercentile) {
+    public void setRegistrationPercentile(Integer registrationPercentile) {
         this.registrationPercentile = registrationPercentile;
     }
 
-    public Double getMileagePercentile() {
+    public Integer getMileagePercentile() {
         return mileagePercentile;
     }
 
-    public void setMileagePercentile(Double mileagePercentile) {
+    public void setMileagePercentile(Integer mileagePercentile) {
         this.mileagePercentile = mileagePercentile;
     }
-
 }
