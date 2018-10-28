@@ -1,5 +1,6 @@
 package de.jgh.pricetrend.mailparser;
 
+import de.jgh.pricetrend.mailparser.model.ModelDetailPrice;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.springframework.stereotype.Service;
 

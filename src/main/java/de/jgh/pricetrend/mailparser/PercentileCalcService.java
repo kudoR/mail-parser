@@ -1,9 +1,9 @@
 package de.jgh.pricetrend.mailparser;
 
+import de.jgh.pricetrend.mailparser.model.ModelDetailPrice;
+import de.jgh.pricetrend.mailparser.repo.ModelDetailPriceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -12,12 +12,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.jgh.pricetrend.mailparser.PercentileType.ERSTZULASSUNG;
-import static de.jgh.pricetrend.mailparser.PercentileType.LAUFLEISTUNG;
-import static de.jgh.pricetrend.mailparser.PercentileType.PREIS;
+import static de.jgh.pricetrend.mailparser.PercentileType.*;
 
-@RestController
-public class ModelDetailPriceController {
+@Service
+public class PercentileCalcService {
 
     @Autowired
     private ModelDetailPriceService modelDetailPriceService;
@@ -25,11 +23,11 @@ public class ModelDetailPriceController {
     @Autowired
     private ModelDetailPriceRepository modelDetailPriceRepository;
 
-    @GetMapping("/evaluation/{model}/{mileage}/{registration}/{price}")
-    public HashMap<String, Double> evaluation(@PathVariable("model") String model,
-                             @PathVariable("mileage") String mileage,
-                             @PathVariable("registration") String registration,
-                             @PathVariable("price") String price) {
+
+    public HashMap<String, Double> evaluation(String model,
+                             String mileage,
+                             String registration,
+                             String price) {
         CalculatedPercentile mileagePercentile = mileagePercentile(model, mileage);
         CalculatedPercentile registrationPercentile = registrationPercentile(model, registration);
         CalculatedPercentile pricePercentile = pricePercentile(model, price);
@@ -49,8 +47,7 @@ public class ModelDetailPriceController {
         return evalResult;
     }
 
-    @GetMapping("/percentile/mileage/{model}/{mileage}")
-    public CalculatedPercentile mileagePercentile(@PathVariable("model") String model, @PathVariable("mileage") String mileage) {
+    public CalculatedPercentile mileagePercentile(String model, String mileage) {
         List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
         Set<CalculatedPercentile> mileagePercentiles = percentilesForModel.get(0);
         return mileagePercentiles
@@ -60,8 +57,7 @@ public class ModelDetailPriceController {
                 .orElse(new CalculatedPercentile(LAUFLEISTUNG, -1, PercentileEnum.MAX));
     }
 
-    @GetMapping("/percentile/registration/{model}/{registration}")
-    public CalculatedPercentile registrationPercentile(@PathVariable("model") String model, @PathVariable("registration") String registration) {
+    public CalculatedPercentile registrationPercentile(String model, String registration) {
         List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
         Set<CalculatedPercentile> registrationPercentiles = percentilesForModel.get(1);
         return registrationPercentiles
@@ -71,8 +67,7 @@ public class ModelDetailPriceController {
                 .orElse(new CalculatedPercentile(ERSTZULASSUNG, -1, PercentileEnum.MAX));
     }
 
-    @GetMapping("/percentile/price/{model}/{price}")
-    public CalculatedPercentile pricePercentile(@PathVariable("model") String model, @PathVariable("price") String price) {
+    public CalculatedPercentile pricePercentile(String model, String price) {
         List<Set<CalculatedPercentile>> percentilesForModel = getPercentilesForModel(model);
         Set<CalculatedPercentile> pricePercentiles = percentilesForModel.get(2);
         return pricePercentiles
@@ -82,8 +77,7 @@ public class ModelDetailPriceController {
                 .orElse(new CalculatedPercentile(PREIS, -1, PercentileEnum.MAX));
     }
 
-    @GetMapping("/percentiles/{model}")
-    public List<Set<CalculatedPercentile>> getPercentilesForModel(@PathVariable("model") String model) {
+    public List<Set<CalculatedPercentile>> getPercentilesForModel(String model) {
         List<ModelDetailPrice> byModel = modelDetailPriceRepository.findByModel(model);
 
         Function<ModelDetailPrice, Long> mapModelDetailToLaufleistung = modelDetailPrice -> modelDetailPrice.getLaufleistung();

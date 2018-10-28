@@ -1,4 +1,7 @@
-package de.jgh.pricetrend.mailparser;
+package de.jgh.pricetrend.mailparser.model;
+
+import de.jgh.pricetrend.mailparser.AnbieterType;
+import de.jgh.pricetrend.mailparser.Artikelzustand;
 
 import javax.persistence.*;
 

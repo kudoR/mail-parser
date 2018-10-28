@@ -1,4 +1,4 @@
-package de.jgh.pricetrend.mailparser;
+package de.jgh.pricetrend.mailparser.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

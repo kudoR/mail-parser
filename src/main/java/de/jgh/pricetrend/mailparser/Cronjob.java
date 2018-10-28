@@ -1,5 +1,13 @@
 package de.jgh.pricetrend.mailparser;
 
+import de.jgh.pricetrend.mailparser.model.Job;
+import de.jgh.pricetrend.mailparser.model.Mail;
+import de.jgh.pricetrend.mailparser.model.ProcessedEntry;
+import de.jgh.pricetrend.mailparser.model.RawEntry;
+import de.jgh.pricetrend.mailparser.repo.JobRepository;
+import de.jgh.pricetrend.mailparser.repo.MailRepository;
+import de.jgh.pricetrend.mailparser.repo.ProcessedEntryRepository;
+import de.jgh.pricetrend.mailparser.repo.RawEntryRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;

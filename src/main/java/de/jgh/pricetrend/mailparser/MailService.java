@@ -2,13 +2,11 @@ package de.jgh.pricetrend.mailparser;
 
 import com.sun.mail.util.MailSSLSocketFactory;
 import de.jgh.pricetrend.mailparser.MessageProcessorConfig.MessageProcessor;
-import org.apache.commons.mail.util.MimeMessageParser;
+import de.jgh.pricetrend.mailparser.repo.MailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
-import javax.mail.internet.MimeMessage;
 import java.util.*;
 
 @Service

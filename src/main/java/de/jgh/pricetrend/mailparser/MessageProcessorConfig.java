@@ -1,5 +1,7 @@
 package de.jgh.pricetrend.mailparser;
 
+import de.jgh.pricetrend.mailparser.model.Mail;
+import de.jgh.pricetrend.mailparser.repo.MailRepository;
 import org.apache.commons.mail.util.MimeMessageParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

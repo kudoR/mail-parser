@@ -1,5 +1,11 @@
 package de.jgh.pricetrend.mailparser;
 
+import de.jgh.pricetrend.mailparser.model.DetailEntry;
+import de.jgh.pricetrend.mailparser.model.DetailEntryId;
+import de.jgh.pricetrend.mailparser.model.Mail;
+import de.jgh.pricetrend.mailparser.model.RawEntry;
+import de.jgh.pricetrend.mailparser.repo.DetailEntryRepository;
+import de.jgh.pricetrend.mailparser.repo.RawEntryRepository;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -7,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,9 +23,11 @@ import java.util.*;
 
 import static de.jgh.pricetrend.mailparser.AnbieterType.GEWERBLICH;
 import static de.jgh.pricetrend.mailparser.AnbieterType.PRIVAT;
-import static de.jgh.pricetrend.mailparser.Artikelzustand.*;
+import static de.jgh.pricetrend.mailparser.Artikelzustand.GEBRAUCHT;
+import static de.jgh.pricetrend.mailparser.Artikelzustand.NEU;
 
 @Service
+@Profile("production")
 public class ParserService {
 
     @Autowired

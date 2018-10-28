@@ -1,4 +1,6 @@
-package de.jgh.pricetrend.mailparser;
+package de.jgh.pricetrend.mailparser.model;
+
+import de.jgh.pricetrend.mailparser.JobStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
