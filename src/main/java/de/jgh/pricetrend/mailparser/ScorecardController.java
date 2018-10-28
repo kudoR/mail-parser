@@ -12,6 +12,7 @@ public class ScorecardController {
 
     @GetMapping
     public void initFullScoring() {
+        System.out.println("called initFullScoring");
         scorecardService.calculateScoring();
     }
 }
