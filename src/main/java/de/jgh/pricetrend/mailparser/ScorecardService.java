@@ -8,11 +8,10 @@ import de.jgh.pricetrend.mailparser.repo.ScoreCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class ScorecardService {
@@ -37,34 +36,31 @@ public class ScorecardService {
         return calculateScoringInternal(modelDetailPriceRepository.findByModel(model));
     }
 
-    private Object calculateScoringInternal(Iterable<ModelDetailPrice> all) {
+    private Object calculateScoringInternal(List<ModelDetailPrice> modelDetailPrices) {
         HashMap<String, Double> report = new HashMap<>();
 
-        all.forEach(modelDetailPrice -> {
+        modelDetailPrices.forEach(modelDetailPrice -> {
             Long id = modelDetailPrice.getId();
-            String model = modelDetailPrice.getModel();
-
             CalculatedPercentile mileagePercentile = null;
             try {
-                mileagePercentile = percentileCalcService.mileagePercentile(model, String.valueOf(modelDetailPrice.getLaufleistung()));
+                mileagePercentile = percentileCalcService.mileagePercentile(String.valueOf(modelDetailPrice.getLaufleistung()), modelDetailPrices);
             } catch (Exception e) {
             }
 
             CalculatedPercentile registrationPercentile = null;
             try {
-                registrationPercentile = percentileCalcService.registrationPercentile(model, String.valueOf(LocalDateTime.of(modelDetailPrice.getErstzulassung(), LocalTime.MIN)));
+                registrationPercentile = percentileCalcService.registrationPercentile(String.valueOf(LocalDateTime.of(modelDetailPrice.getErstzulassung(), LocalTime.MIN)), modelDetailPrices);
             } catch (Exception e) {
             }
 
             CalculatedPercentile pricePercentile = null;
             try {
-                pricePercentile = percentileCalcService.pricePercentile(model, String.valueOf(modelDetailPrice.getPreis()));
+                pricePercentile = percentileCalcService.pricePercentile(String.valueOf(modelDetailPrice.getPreis()), modelDetailPrices);
             } catch (Exception e) {
             }
 
             ScoreCard scoreCard = new ScoreCard(id, pricePercentile != null ? pricePercentile.getLabel().getPercentile() : null, registrationPercentile != null ? registrationPercentile.getLabel().getPercentile() : null, mileagePercentile != null ? mileagePercentile.getLabel().getPercentile() : null);
             scoreCardRepository.save(scoreCard);
-
         });
 
         return report;
