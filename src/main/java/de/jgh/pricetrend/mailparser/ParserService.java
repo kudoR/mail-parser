@@ -1,10 +1,8 @@
 package de.jgh.pricetrend.mailparser;
 
-import de.jgh.pricetrend.mailparser.model.DetailEntry;
-import de.jgh.pricetrend.mailparser.model.DetailEntryId;
-import de.jgh.pricetrend.mailparser.model.Mail;
-import de.jgh.pricetrend.mailparser.model.RawEntry;
+import de.jgh.pricetrend.mailparser.model.*;
 import de.jgh.pricetrend.mailparser.repo.DetailEntryRepository;
+import de.jgh.pricetrend.mailparser.repo.ModelEntryRepository;
 import de.jgh.pricetrend.mailparser.repo.RawEntryRepository;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -35,6 +33,9 @@ public class ParserService {
 
     @Autowired
     private RawEntryRepository rawEntryRepository;
+
+    @Autowired
+    private ModelEntryRepository modelEntryRepository;
 
     @Value("${parser_dialect}")
     private String parserDialect;
@@ -157,6 +158,8 @@ public class ParserService {
                     detailEntryRepository.save(detailEntry);
                 }
 
+                saveModelEntry(inseratId, model);
+
             } catch (Exception e) {
             }
         } catch (HttpStatusException e) {
@@ -168,6 +171,21 @@ public class ParserService {
         }
 
 
+    }
+
+    private void saveModelEntry(String inseratId, String model) {
+        List<RawEntry> byLink = rawEntryRepository.findByLink(inseratId);
+        if (!byLink.isEmpty()) {
+            Long id = byLink.get(0).getId();
+
+            Optional<ModelEntry> byId = modelEntryRepository.findById(id);
+            if (!byId.isPresent()) {
+                ModelEntry modelEntry = new ModelEntry();
+                modelEntry.setId(id);
+                modelEntry.setModel(model);
+                modelEntryRepository.save(modelEntry);
+            }
+        }
     }
 
 }
